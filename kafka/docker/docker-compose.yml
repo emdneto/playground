@@ -68,3 +68,20 @@ services:
       KAFKA_DEFAULT_REPLICATION_FACTOR: 3
     depends_on:
       - zookeeper
+  ### Kafka UI
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    ports: ["8081:9000"]
+    environment:
+      KAFKA_BROKERCONNECT: "broker1:9091,broker2:9091,broker3:9091"
+      JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8082:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker1:9091,broker2:9091,broker3:9091
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
