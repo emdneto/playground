@@ -1,68 +1,3 @@
-// import { check } from 'k6';
-// import { Writer, produce, Connection } from 'k6/x/kafka';
-
-// const brokers = ['broker1:9091', 'broker2:9091', 'broker3:9091'];
-// const kafkaTopic = 'xk6_events';
-
-// const producer = Writer({
-//   brokers: brokers, 
-//   topic: kafkaTopic,
-//   autoCreateTopic: true
-// });
-
-// const connection = new Connection({
-//     address: brokers[0],
-//   });
-
-// if (__VU == 0) {
-//   connection.createTopic({
-//     topic: kafkaTopic,
-//     numPartitions: 32,
-//     replicationFactor: 3
-//   });
-// }
-
-
-
-// export default function () {
-//     const messages = [
-//       {
-//         key: JSON.stringify({
-//           correlationId: 'transaction-' + getRandomInt(),
-//         }),
-//         value: JSON.stringify({
-//         }),
-//       }
-//     ];
-  
-//     const error = producer.produce({messages: messages});
-//     check(error, {
-//       'is sent': (err) => err == undefined,
-//     });
-//   }
-
-// export function teardown(data) {
-//     producer.close();
-//     //consumer.close();
-// }
-
-// // import http from 'k6/http';
-// // import { check, sleep } from 'k6';
-
-// // export const options = {
-// //   stages: [
-// //     { duration: '30s', target: 20 },
-// //     { duration: '1m30s', target: 10 },
-// //     { duration: '20s', target: 0 },
-// //   ],
-// // };
-
-// // export default function () {
-// //   const res = http.get('https://httpbin.test.k6.io/');
-// //   check(res, { 'status was 200': (r) => r.status == 200 });
-// //   sleep(1);
-// // }
-
 import { check } from "k6";
 import { uuidv4 , randomString, randomIntBetween} from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 // import * as kafka from "k6/x/kafka";
@@ -80,8 +15,6 @@ import {
 
 const brokers = ['broker1:9091', 'broker2:9091', 'broker3:9091'];
 const topic = "K6_EVENTS";
-const topic_rf = 3
-const topic_parts = 32
 const groupID = "k6";
 
 const writer = new Writer({
@@ -99,14 +32,6 @@ const connection = new Connection({
 });
 
 const schemaRegistry = new SchemaRegistry();
-
-// if (__VU == 0) {
-//   connection.createTopic({
-//     topic: topic,
-//     numPartitions: 32,
-//     replicationFactor: 3,
-//   });
-// }
 
 export const options = {
   scenarios: {
@@ -126,10 +51,6 @@ export const options = {
     kafka_reader_error_count: ["count == 0"],
   },
 };
-
-function getRandomInt(max = 100000) {
-  return Math.floor(Math.random() * max + 1);
-}
 
 
 export default function () {
@@ -198,10 +119,6 @@ export default function () {
 }
 
 export function teardown(data) {
-  // if (__VU == 0) {
-  //   // Delete the topic
-  //   connection.deleteTopic(topic);
-  // }
   writer.close();
   reader.close();
   connection.close();
