@@ -70,6 +70,7 @@ services:
       - zookeeper
   ### Kafka UI
   kafdrop:
+    container_name: kafdrop
     image: obsidiandynamics/kafdrop:latest
     ports: ["8081:9000"]
     environment:
@@ -82,6 +83,6 @@ services:
     ports:
       - 8082:8080
     environment:
-      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_NAME: playground
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker1:9091,broker2:9091,broker3:9091
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
