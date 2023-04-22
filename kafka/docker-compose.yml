@@ -1,0 +1,88 @@
+version: '3'
+
+services:
+  ### Kafka cluster
+  zookeeper:
+    container_name: zookeeper
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+  broker1:
+    container_name: broker1
+    image: 'confluentinc/cp-kafka:7.3.2'
+    ports:
+      - "9092:9092"
+    environment:
+      BOOTSTRAP_SERVERS: broker1:9091,broker2:9091"
+      KAFKA_BROKER_ID: "1"
+      KAFKA_BROKER_RACK: "RN1"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INT
+      KAFKA_ADVERTISED_LISTENERS: INT://broker1:9091,EXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INT:PLAINTEXT,EXT:PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+    depends_on:
+      - zookeeper
+  broker2:
+    container_name: broker2
+    image: 'confluentinc/cp-kafka:7.3.2'
+    ports:
+      - "9093:9093"
+    environment:
+      BOOTSTRAP_SERVERS: broker1:9091,broker2:9091"
+      KAFKA_BROKER_ID: "2"
+      KAFKA_BROKER_RACK: "RN1"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INT
+      KAFKA_ADVERTISED_LISTENERS: INT://broker2:9091,EXT://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INT:PLAINTEXT,EXT:PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+    depends_on:
+      - zookeeper
+  broker3:
+    container_name: broker3
+    image: 'confluentinc/cp-kafka:7.3.2'
+    ports:
+      - "9094:9094"
+    environment:
+      BOOTSTRAP_SERVERS: broker1:9091,broker2:9091"
+      KAFKA_BROKER_ID: "3"
+      KAFKA_BROKER_RACK: "RN1"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INT
+      KAFKA_ADVERTISED_LISTENERS: INT://broker3:9091,EXT://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INT:PLAINTEXT,EXT:PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+    depends_on:
+      - zookeeper
+  ### Kafka UI
+  kafdrop:
+    container_name: kafdrop
+    image: obsidiandynamics/kafdrop:latest
+    ports: ["8081:9000"]
+    environment:
+      KAFKA_BROKERCONNECT: "broker1:9091,broker2:9091,broker3:9091"
+      JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8082:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: playground
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker1:9091,broker2:9091,broker3:9091
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
